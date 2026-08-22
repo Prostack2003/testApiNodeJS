@@ -1,0 +1,20 @@
+{
+  "name": "kbju-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/server.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "jest": "^30.4.2",
+    "pg": "^8.23.0"
+  },
+  "devDependencies": {
+    "supertest": "^7.2.2"
+  }
+}
