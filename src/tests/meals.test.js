@@ -1,6 +1,6 @@
 const { describe, expect, test, beforeAll, beforeEach, afterAll } = require('@jest/globals');
 const request = require('supertest');
-const app = require('../server');
+const app = require('../app');
 const pool = require('../db/pool');
 
 // Тесты на сервер
