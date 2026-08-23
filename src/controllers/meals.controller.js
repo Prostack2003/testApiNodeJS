@@ -1,41 +1,26 @@
 const mealsService = require('../services/meals.service');
 
-async function getMeals(req, res, url) {
-    const userId = url.searchParams.get('user_id');
-    const date = url.searchParams.get('date');
+async function getMeals(req, res) {
+    const userId = req.query.user_id;
+    const date = req.query.date;
 
    try {
        if (!userId) {
-           res.statusCode = 400;
-           res.setHeader('Content-Type', 'application/json');
-           return res.end(JSON.stringify({error: 'user_id обязателен'}));
+           return res.status(400).json({ error: 'user_id обязателен' });
        }
 
        const meals = await mealsService.getMeals(userId, date);
 
-       res.statusCode = 200;
-       res.setHeader('Content-Type', 'application/json');
-       return res.end(JSON.stringify(meals));
+       return res.json(meals);
    } catch (error) {
-       res.statusCode = 500;
-       res.setHeader('Content-Type', 'application/json');
-       return res.end(JSON.stringify({ error: error.message }));
+       return res.status(500).json({ error: error.message });
    }
 }
 async function createMeal(req, res) {
-    let body = ''
-
-    req.on('data', (chunk) => {
-        body += chunk;
-    })
-
-    req.on('end', async () => {
+    const data = req.body;
         try {
-            const data = JSON.parse(body);
-
             if (data.user_id == null || data.product_id == null || data.weight_grams == null) {
-                res.statusCode = 400;
-                return res.end(JSON.stringify({ error: 'Обязательные поля не переданы' }));
+                return res.status(400).json({error: 'Обязательные поля не переданы'})
             }
 
             const meal = await mealsService.createMeal({
@@ -44,54 +29,33 @@ async function createMeal(req, res) {
                 weightGrams: data.weight_grams,
                 dateEat: data.date_eat,
             });
+            return res.status(201).json(meal);
 
-
-            res.statusCode = 201;
-            res.setHeader('Content-Type', 'application/json');
-
-            return res.end(JSON.stringify(meal));
         } catch (err) {
             if (err instanceof SyntaxError) {
-                res.statusCode = 400;
-                return res.end(JSON.stringify({ error: 'Невалидный JSON' }));
+                // res.statusCode = 400;
+                // return res.end(JSON.stringify({ error: 'Невалидный JSON' }));
+                return res.status(400).json({error: 'Невалидный JSON'});
             }
             if (err.message === 'USER_NOT_FOUND' || err.message === 'PRODUCT_NOT_FOUND') {
-                res.statusCode = 404;
-                return res.end(JSON.stringify({ error: err.message === 'USER_NOT_FOUND' ? 'Пользователь не найден' : 'Продукт не найден' }));
+                return res.status(404).json({error: err.message === 'USER_NOT_FOUND' ? 'Пользователь не найден' : 'Продукт не найден'})
             }
             if (err.message === 'VALIDATION_ERROR') {
-                res.statusCode = 400;
-                return res.end(JSON.stringify({ error: 'weight_grams должен быть > 0' }));
+                return res.status(400).json({error: 'weight_grams должен быть > 0'});
             }
-            res.statusCode = 500;
-            res.setHeader('Content-Type', 'application/json');
+            return res.status(500).json({error: 'Internal Server Error'});
 
-            return res.end(JSON.stringify({ error: 'Internal Server Error' }));
         }
-    })
 }
-async function updateMeal(req, res, id) {
-    const mealId = parseInt(id);
-
+async function updateMeal(req, res) {
+    const mealId = parseInt(req.params.id, 10);
     if (isNaN(mealId)) {
-        res.statusCode = 400;
-        res.setHeader('Content-Type', 'application/json');
-        return res.end(JSON.stringify({error: 'id должен быть числом'}))
+        return res.status(400).json({error: 'id должен быть числом!'})
     }
-
-    let body = '';
-
-    req.on('data', (chunk) => {
-        body += chunk;
-    })
-
-    req.on('end', async () => {
+    const data = req.body;
         try {
-            const data = JSON.parse(body);
-
             if (!data || (data.weight_grams == null && data.date_eat == null)) {
-                res.statusCode = 400;
-                return res.end(JSON.stringify({ error: 'Нечего обновлять' }));
+                return res.status(400).json({error: 'Нечего обновлять!'})
             }
 
             const updated = await mealsService.updateMeal(mealId, {
@@ -99,56 +63,40 @@ async function updateMeal(req, res, id) {
                 dateEat: data.date_eat,
             });
 
-            res.statusCode = 200;
-            res.setHeader('Content-Type', 'application/json');
-            return res.end(JSON.stringify(updated));
+            return res.status(200).json(updated);
 
         } catch (error) {
             if (error instanceof SyntaxError) {
-                res.statusCode = 400;
-                return res.end(JSON.stringify({ error: 'Невалидный JSON' }));
+                return res.status(400).json({error: 'Невалидный JSON'});
             }
             if (error.message === 'VALIDATION_ERROR') {
-                res.statusCode = 400;
-                return res.end(JSON.stringify({ error: 'weight_grams должен быть > 0' }));
+                return res.status(400).json({error: 'weight_grams должен быть > 0'})
             }
             if (error.message === 'NOTHING_TO_UPDATE') {
-                res.statusCode = 400;
-                return res.end(JSON.stringify({ error: 'Нечего обновлять' }));
+                return res.status(400).json({error: 'Нечего обновлять'})
             }
             if (error.message === 'MEAL_NOT_FOUND') {
-                res.statusCode = 404;
-                return res.end(JSON.stringify({ error: 'Запись не найдена' }));
+                return res.status(404).json({error: 'Запись о приеме пищи не найдена!'})
             }
-            res.statusCode = 500;
-            res.setHeader('Content-Type', 'application/json');
-            return res.end(JSON.stringify({ error: 'Internal Server Error' }));
-        }
-    })
-}
-async function deleteMeal(req, res, id) {
-    const userId = parseInt(id);
-    if (isNaN(userId)) {
-        res.statusCode = 400;
-        res.setHeader('Content-Type', 'application/json');
-        return res.end(JSON.stringify({error: 'id должен быть числом'}));
-    }
+            return res.status(500).json({error: 'Internal Server Error'});
 
+        }
+}
+async function deleteMeal(req, res) {
+    const mealId = parseInt(req.params.id, 10);
+    if (isNaN(mealId)) {
+        return res.status(400).json({error: 'id должен быть числом!'})
+    }
     try {
-        const isDelete = await mealsService.deleteMeal(userId);
+        const isDelete = await mealsService.deleteMeal(mealId);
 
         if (isDelete) {
-            res.statusCode = 204;
-            return res.end('');
+            return res.status(204).end()
         } else {
-            res.statusCode = 404;
-            res.setHeader('Content-Type', 'application/json');
-            return res.end(JSON.stringify({ error: 'Запись не найдена' }));
+            return res.status(404).json({error: 'Запись не найдена'})
         }
     } catch (error) {
-        res.statusCode = 500;
-        res.setHeader('Content-Type', 'application/json');
-        return res.end(JSON.stringify({ error: 'Internal Server Error' }));
+        return res.status(500).json({error: 'Internal Server Error'});
     }
 }
 
