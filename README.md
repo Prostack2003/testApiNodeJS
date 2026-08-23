@@ -99,9 +99,9 @@ REST API для трекинга приёмов пищи и расчёта КБ�
 
    3. PATCH /api/meals/:id (Частично обновить приём пищи.)
       
-      
-Path Parameters:
+
   ``` 
+  Path Parameters:
    1) id: ID приёма пищи
    
    ```
