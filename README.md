@@ -61,7 +61,7 @@ REST API для трекинга приёмов пищи и расчёта КБ�
     │   └── meals.controller.js
     ├── routes/          # Маршрутизация (URL + Method → Controller)
     │   └── meals.router.js
-    └── server.js        # Точка входа (createServer + listen)
+    └── app.js        # Точка входа (createServer + listen)
 
 📄 Лицензия
 Учебный проект. Без лицензии.
