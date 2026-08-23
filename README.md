@@ -1,24 +1,26 @@
 # KBZU API
 
-REST API для трекинга приёмов пищи и расчёта КБЖУ. Учебный проект, демонстрирующий полный цикл backend-разработки: от проектирования БД до слоистой архитектуры и тестирования.
+REST API для трекинга приёмов пищи и расчёта КБЖУ. Учебный проект, демонстрирующий полный цикл backend-разработки: от проектирования БД до слоистой архитектуры на Express.js.
 
 ## 🚀 Технологии
 
-- **Runtime:** Node.js (native `http` module)
+- **Framework:** Express.js
+- **Runtime:** Node.js
 - **Database:** PostgreSQL
 - **Architecture:** Layered Architecture (Config → DB → Service → Controller → Router)
-- **Testing:** Jest + supertest (in progress)
+- **Error Handling:** Централизованный error-handling middleware
 - **Environment:** dotenv
 
 ## 📋 Возможности
 
-- ✅ CRUD операции для приёмов пищи (`meal_items`)
+- ✅ Полный CRUD для приёмов пищи (`meal_items`)
+- ✅ Частичное обновление через PATCH (динамический SQL)
 - ✅ Валидация входных данных (400 Bad Request)
 - ✅ Проверка существования связанных сущностей (404 Not Found)
-- ✅ Динамические SQL-запросы (фильтрация по дате, частичное обновление)
-- ✅ Единая обработка ошибок (async/await + try/catch)
+- ✅ Динамические SQL-запросы (фильтрация по дате, динамический UPDATE)
+- ✅ Единая обработка ошибок через error-handling middleware
 - ✅ Разделение бизнес-логики и HTTP-слоя
-- ✅ Конфигурация через переменные окружения
+- ✅ Конфигурация через переменные окружения (.env)
 
 ## 🛠 Установка
 
@@ -50,18 +52,73 @@ REST API для трекинга приёмов пищи и расчёта КБ�
 
 ## 🛠 **Структура папок**
 
-    src/
-    ├── config/          # Конфигурация (port, DB credentials)
-    │   └── index.js
-    ├── db/              # Подключение к PostgreSQL
-    │   └── pool.js
-    ├── services/        # Бизнес-логика (без знания про HTTP)
-    │   └── meals.service.js
-    ├── controllers/     # HTTP-адаптеры (валидация, маппинг ошибок)
-    │   └── meals.controller.js
-    ├── routes/          # Маршрутизация (URL + Method → Controller)
-    │   └── meals.router.js
-    └── app.js        # Точка входа (createServer + listen)
+    kbju-api/
+      ├── src/
+      │   ├── config/              # Конфигурация (port, DB credentials)
+      │   │   └── index.js
+      │   ├── db/                  # Подключение к PostgreSQL
+      │   │   └── pool.js
+      │   ├── services/            # Бизнес-логика (без знания про HTTP)
+      │   │   └── meals.service.js
+      │   ├── controllers/         # HTTP-адаптеры (валидация, вызов сервисов)
+      │   │   └── meals.controller.js
+      │   ├── routes/              # Маршрутизация (Express Router)
+      │   │   └── meals.router.js
+      │   ├── middleware/           # Express middleware
+      │   │   └── errorHandler.js
+      │   ├── app.js               # Настройка Express app (middleware, роуты)
+      │   └── server.js            # Точка входа (app.listen)
+      ├── .env                     # Переменные окружения (не коммитится!)
+      ├── .env.example             # Шаблон переменных (коммитится)
+      ├── .gitignore               # Игнорируемые файлы
+      ├── package.json             # Зависимости и скрипты
+      ├── schema.sql               # Схема БД (DDL)
+      └── README.md                # Документация
+
+📡 API Endpoints
+
+   1. GET /api/meals (Получить список приёмов пищи пользователя)
+```
+   Query Parameters:
+   
+   1) user_id (обязательный): ID пользователя
+   
+   2) date (опциональный): фильтрация по дате (YYYY-MM-DD)
+```
+   2. POST /api/meals (Создать новый приём пищи)
+```
+   JSON BODY
+   
+   {
+     "user_id": 6,
+     "product_id": 8,
+     "weight_grams": 150,
+     "date_eat": "2026-08-17"
+   }
+```
+
+   3. PATCH /api/meals/:id (Частично обновить приём пищи.)
+      
+      
+Path Parameters:
+  ``` 
+   1) id: ID приёма пищи
+   
+   ```
+```
+   JSON BODY
+   
+   {
+     "weight_grams": 250,
+     "date_eat": "2026-08-22"
+   }
+```
+
+   4. DELETE /api/meals/:id (Удалить приём пищи)
+```
+   Path Parameters:
+   1) id: ID приёма пищи
+```
 
 📄 Лицензия
 Учебный проект. Без лицензии.
