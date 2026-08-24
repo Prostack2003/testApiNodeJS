@@ -1,7 +1,4 @@
-const env = process.env.NODE_ENV || 'development';
-const envFile = env === 'test' ? '.env.test' : '.env';
-
-require('dotenv').config({path: envFile});
+require('dotenv').config();
 
 const config  = {
     port: parseInt(process.env.PORT, 10) || 3000,
