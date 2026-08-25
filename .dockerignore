@@ -1,0 +1,23 @@
+# Node
+## Logs
+logs
+.idea
+*.log
+.git
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+## Application
+node_modules/
+jest.config.js
+README.md
+
+
+## Docker
+Dockerfile
+
+
+## Secrets
+.env
+.gitignore
