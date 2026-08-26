@@ -2,6 +2,8 @@
 -- PostgreSQL database dump
 --
 
+\restrict 0A3wopq6DXEAefT1knmIoWXxhztRCLcIIa9YXM3YCVxqC2H3UbtDonKtzycdMiK
+
 -- Dumped from database version 17.11
 -- Dumped by pg_dump version 17.11
 
@@ -17,6 +19,20 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
+--
+-- Name: public; Type: SCHEMA; Schema: -; Owner: -
+--
+
+-- CREATE SCHEMA public;
+
+
+--
+-- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: -
+--
+
+COMMENT ON SCHEMA public IS 'standard public schema';
+
+
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
@@ -28,10 +44,9 @@ SET default_table_access_method = heap;
 CREATE TABLE public.meal_items (
                                    id integer NOT NULL,
                                    user_id integer NOT NULL,
-                                   product_id integer,
+                                   product_id integer NOT NULL,
                                    weight_grams integer NOT NULL,
-                                   date_eat date DEFAULT CURRENT_DATE NOT NULL,
-                                   CONSTRAINT chk_weight_grams CHECK ((weight_grams > 0))
+                                   date_eat date DEFAULT CURRENT_DATE NOT NULL
 );
 
 
@@ -65,11 +80,7 @@ CREATE TABLE public.products (
                                  calories_per_100g numeric(5,2) NOT NULL,
                                  proteins_per_100g numeric(5,2) NOT NULL,
                                  fats_per_100g numeric(5,2) NOT NULL,
-                                 carbs_per_100g numeric(5,2) NOT NULL,
-                                 CONSTRAINT chk_calories CHECK ((calories_per_100g >= (0)::numeric)),
-                                 CONSTRAINT chk_carbs CHECK ((carbs_per_100g >= (0)::numeric)),
-                                 CONSTRAINT chk_fats CHECK ((fats_per_100g >= (0)::numeric)),
-                                 CONSTRAINT chk_proteins CHECK ((proteins_per_100g >= (0)::numeric))
+                                 carbs_per_100g numeric(5,2) NOT NULL
 );
 
 
@@ -102,16 +113,11 @@ CREATE TABLE public.users (
                               name character varying(254) NOT NULL,
                               email character varying(254) NOT NULL,
                               password character varying(254) NOT NULL,
-                              weight numeric(5,2) NOT NULL,
+                              weight integer NOT NULL,
                               height integer NOT NULL,
                               age integer NOT NULL,
                               gender character(1) NOT NULL,
-                              activity_level integer NOT NULL,
-                              CONSTRAINT chk_activity CHECK (((activity_level >= 1) AND (activity_level <= 5))),
-                              CONSTRAINT chk_age CHECK (((age > 0) AND (age < 150))),
-                              CONSTRAINT chk_gender CHECK ((gender = ANY (ARRAY['M'::bpchar, 'F'::bpchar]))),
-                              CONSTRAINT chk_height CHECK ((height > 0)),
-                              CONSTRAINT chk_weight CHECK ((weight > (0)::numeric))
+                              activity_level integer NOT NULL
 );
 
 
@@ -142,7 +148,7 @@ ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
 CREATE TABLE public.weight_history (
                                        id integer NOT NULL,
                                        user_id integer NOT NULL,
-                                       weight numeric(5,2) NOT NULL,
+                                       weight integer NOT NULL,
                                        measured_at date DEFAULT CURRENT_DATE NOT NULL
 );
 
@@ -236,25 +242,11 @@ ALTER TABLE ONLY public.weight_history
 
 
 --
--- Name: idx_meal_items_user_date; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_meal_items_user_date ON public.meal_items USING btree (user_id, date_eat);
-
-
---
--- Name: idx_weight_history_user_id; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_weight_history_user_id ON public.weight_history USING btree (user_id);
-
-
---
 -- Name: meal_items meal_items_product_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.meal_items
-    ADD CONSTRAINT meal_items_product_id_fkey FOREIGN KEY (product_id) REFERENCES public.products(id) ON DELETE SET NULL;
+    ADD CONSTRAINT meal_items_product_id_fkey FOREIGN KEY (product_id) REFERENCES public.products(id);
 
 
 --
@@ -270,12 +262,12 @@ ALTER TABLE ONLY public.meal_items
 --
 
 ALTER TABLE ONLY public.weight_history
-    ADD CONSTRAINT weight_history_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
+    ADD CONSTRAINT weight_history_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id);
 
 
 --
 -- PostgreSQL database dump complete
 --
 
-
+\unrestrict 0A3wopq6DXEAefT1knmIoWXxhztRCLcIIa9YXM3YCVxqC2H3UbtDonKtzycdMiK
 
