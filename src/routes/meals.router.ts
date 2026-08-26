@@ -1,10 +1,11 @@
-const express = require("express");
+import express from 'express';
+import mealsController from '../controllers/meals.controller';
+
 const mealsRouter = express.Router();
-const mealsController = require("../controllers/meals.controller");
 
 mealsRouter.get("/", mealsController.getMeals);
 mealsRouter.post("/", mealsController.createMeal);
 mealsRouter.patch("/:id", mealsController.updateMeal);
 mealsRouter.delete("/:id", mealsController.deleteMeal);
 
-module.exports = mealsRouter;
+export default mealsRouter;

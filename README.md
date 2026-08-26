@@ -55,18 +55,18 @@ REST API для трекинга приёмов пищи и расчёта КБ�
     kbju-api/
       ├── src/
       │   ├── config/              # Конфигурация (port, DB credentials)
-      │   │   └── index.js
+      │   │   └── index.ts
       │   ├── db/                  # Подключение к PostgreSQL
-      │   │   └── pool.js
+      │   │   └── pool.ts
       │   ├── services/            # Бизнес-логика (без знания про HTTP)
-      │   │   └── meals.service.js
+      │   │   └── meals.service.ts
       │   ├── controllers/         # HTTP-адаптеры (валидация, вызов сервисов)
-      │   │   └── meals.controller.js
+      │   │   └── meals.controller.ts
       │   ├── routes/              # Маршрутизация (Express Router)
-      │   │   └── meals.router.js
+      │   │   └── meals.router.ts
       │   ├── middleware/           # Express middleware
-      │   │   └── errorHandler.js
-      │   ├── app.js               # Настройка Express app (middleware, роуты)
+      │   │   └── errorHandler.ts
+      │   ├── app.ts               # Настройка Express app (middleware, роуты)
       │   └── server.js            # Точка входа (app.listen)
       ├── .env                     # Переменные окружения (не коммитится!)
       ├── .env.example             # Шаблон переменных (коммитится)

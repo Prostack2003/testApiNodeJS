@@ -1,5 +1,7 @@
-function errorHandler(err, req, res, next) {
-    // Битый JSON от express.json()
+import { Request, Response, NextFunction } from 'express'
+import err from "./errorInterface";
+
+function errorHandler(err: err, req: Request, res: Response, next: NextFunction) {
     if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
         return res.status(400).json({ error: 'Невалидный JSON' });
     }
@@ -26,6 +28,6 @@ function errorHandler(err, req, res, next) {
     return res.status(500).json({ error: 'Internal Server Error' });
 }
 
-module.exports = errorHandler;
+export default errorHandler;
 
 

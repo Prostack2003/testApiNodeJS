@@ -1,6 +1,8 @@
-const pool = require('../db/pool');
+import pool from "../db/pool";
+import {CreateMealParams, MealItem, MealWithDetails, UpdateMealParams} from "../interfaces/domain.interfaces";
+import {MealRow, MealWithDetailsRow} from "../interfaces/db.interfaces";
 
-async function getMeals(userId, date) {
+async function getMeals(userId: number, date?: string): Promise<MealWithDetails[]> {
     let productUserDataQuery =
         `
             SELECT
@@ -14,7 +16,7 @@ async function getMeals(userId, date) {
             WHERE mi.user_id = $1
         `;
 
-    const params = [userId];
+    const params: Array<string | number> = [userId];
 
     if (date) {
         productUserDataQuery +=
@@ -24,29 +26,30 @@ async function getMeals(userId, date) {
         params.push(date);
     }
 
-    const result = await pool.query(productUserDataQuery, params);
+    const result = await pool.query<MealWithDetailsRow>(productUserDataQuery, params);
 
     return result.rows.map(row => ({
-        ...row,
-        weight_grams: Number(row.weight_grams),
-        calories: Number(row.calories)
+        id: row.id,
+        productName: row.product_name,
+        weightGrams: Number(row.weight_grams),
+        dateEat: row.date_eat,
+        calories: Number(row.calories),
     }));
 }
+async function createMeal(params : CreateMealParams ): Promise<MealItem> {
 
-async function createMeal({userId, productId, weightGrams, dateEat}) {
-
-    if (!weightGrams || weightGrams <= 0) {
+    if (!params.weightGrams || params.weightGrams <= 0) {
         throw new Error('VALIDATION_ERROR');
     }
 
     const searchUserQuery = `SELECT name FROM users WHERE id = $1`
-    const searchUserResult = await pool.query(searchUserQuery, [userId]);
+    const searchUserResult = await pool.query<{ name: string }>(searchUserQuery, [params.userId]);
     if (searchUserResult.rows.length === 0) {
         throw new Error('USER_NOT_FOUND');
     }
 
     const searchProductQuery = `SELECT name FROM products WHERE id = $1`
-    const searchProductResult = await pool.query(searchProductQuery, [productId]);
+    const searchProductResult = await pool.query<{ name: string }>(searchProductQuery, [params.productId]);
     if (searchProductResult.rows.length === 0) {
         throw new Error('PRODUCT_NOT_FOUND');
     }
@@ -60,18 +63,24 @@ async function createMeal({userId, productId, weightGrams, dateEat}) {
 
         `;
 
-    const mealItemsNewData = await pool.query(
+    const mealItemsNewData = await pool.query<MealRow>(
         mealItemsNewDataQuery,
-        [userId, productId, weightGrams, dateEat]
+        [params.userId, params.productId, params.weightGrams, params.dateEat]
     );
 
-    return mealItemsNewData.rows[0];
+    const row = mealItemsNewData.rows[0];
+    return {
+        id: row.id,
+        userId: row.user_id,
+        productId: row.product_id,
+        weightGrams: Number(row.weight_grams),
+        dateEat: row.date_eat,
+    };
 
 }
-
-async function updateMeal(id, updates) {
-    const fieldsQuery = [];
-    const paramsQuery = [];
+async function updateMeal(id: number, updates: UpdateMealParams): Promise<MealItem> {
+    const fieldsQuery: string[] = [];
+    const paramsQuery: Array<string | number> = [];
 
     if (updates.weightGrams != null) {
         fieldsQuery.push(`weight_grams = $${paramsQuery.length + 1}`)
@@ -100,23 +109,29 @@ async function updateMeal(id, updates) {
         RETURNING id, user_id, product_id, weight_grams, date_eat::text AS date_eat
     `;
 
-    const result = await pool.query(queryUpdate, paramsQuery);
+    const result = await pool.query<MealRow>(queryUpdate, paramsQuery);
     if (result.rows.length === 0) {
         throw new Error('MEAL_NOT_FOUND');
     }
-    return result.rows[0];
 
+    const row = result.rows[0];
+    return {
+        id: row.id,
+        userId: row.user_id,
+        productId: row.product_id,
+        weightGrams: Number(row.weight_grams),
+        dateEat: row.date_eat,
+    };
 
 }
-
-async function deleteMeal(id) {
+async function deleteMeal(id: number): Promise<boolean> {
         const deleteQuery =
             `DELETE
              FROM meal_items
              WHERE id = $1 RETURNING id`;
 
-        const deleteResult = await pool.query(deleteQuery, [id]);
+        const deleteResult = await pool.query<{id: number}>(deleteQuery, [id]);
         return deleteResult.rows.length !== 0;
 }
 
-module.exports = { getMeals, createMeal, updateMeal, deleteMeal };
+export default {getMeals, createMeal, updateMeal, deleteMeal};

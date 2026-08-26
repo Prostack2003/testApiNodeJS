@@ -10,7 +10,7 @@ yarn-error.log*
 
 ## Application
 node_modules/
-jest.config.js
+jest.config.ts
 README.md
 
 

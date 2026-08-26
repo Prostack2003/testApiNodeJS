@@ -1,7 +1,7 @@
-const express = require('express');
-const mealsRouter = require("./routes/meals.router");
-const config = require("./config");
-const errorHandler = require("./middleware/errorHandler");
+import express from 'express';
+import config from './config/index';
+import mealsRouter from './routes/meals.router';
+import errorHandler from './middleware/errorHandler';
 
 
 const app = express();
@@ -19,4 +19,4 @@ app.listen(config.port, () => {
 });
 
 
-module.exports = app;
+export default app;

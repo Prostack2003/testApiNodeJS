@@ -9,7 +9,7 @@ describe('Старт сервера', () => {
         const res = await request(app).get('/');
         expect(res.statusCode).toBe(200);
 
-        console.log('Тест запущен! База:', require('/src/config/index').db.database);
+        console.log('Тест запущен! База:', require('/src/config').db.database);
     });
 });
 
