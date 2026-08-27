@@ -3,9 +3,12 @@ import { Request, Response } from 'express';
 import config from './config/index';
 import mealsRouter from './routes/meals.router';
 import errorHandler from './middleware/errorHandler';
-
+import cors from 'cors';
 
 const app = express();
+app.use(cors({
+    origin: 'http://localhost:5500'
+}));
 app.use(express.json());
 app.get('/', (req: Request, res: Response) => {
     res.send('Hello World!');
@@ -18,6 +21,5 @@ app.use(errorHandler)
 app.listen(config.port, () => {
     console.log(`New API with Express.JS listening on port ${config.port}`);
 });
-
 
 export default app;
