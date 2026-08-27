@@ -1,15 +1,10 @@
-import { Request, Response, NextFunction } from "express";
+import {NextFunction, Request, Response} from "express";
 import mealsService from '../services/meals.service'
-import { z } from "zod";
 import {CreateMealParams} from "../interfaces/domain.interfaces";
+import {CreateMealBodySchema, GetMealsQuerySchema, UpdateMealBodySchema} from "../validation/meal.schema";
 
 async function getMeals(req: Request, res: Response, next: NextFunction) {
-    const querySchema = z.object({
-        user_id: z.string().transform(Number),
-        date: z.string().optional(),
-    })
-
-    const parsedQuerySchema = querySchema.safeParse(req.query)
+    const parsedQuerySchema = GetMealsQuerySchema.safeParse(req.query)
 
     if (!parsedQuerySchema.success) {
         return res.status(400).json({
@@ -26,14 +21,7 @@ async function getMeals(req: Request, res: Response, next: NextFunction) {
    }
 }
 async function createMeal(req: Request, res: Response, next: NextFunction) {
-    const bodySchema = z.object({
-        user_id: z.number(),
-        product_id: z.number(),
-        weight_grams: z.number(),
-        date_eat: z.string().optional(),
-    })
-
-    const parsedBodySchema = bodySchema.safeParse(req.body)
+    const parsedBodySchema = CreateMealBodySchema.safeParse(req.body)
 
     if (!parsedBodySchema.success) {
         return res.status(400).json({error: 'Обязательные поля не переданы'})
@@ -53,12 +41,7 @@ async function createMeal(req: Request, res: Response, next: NextFunction) {
         }
 }
 async function updateMeal(req: Request, res: Response, next: NextFunction) {
-    const bodySchema = z.object({
-        weight_grams: z.number().optional(),
-        date_eat: z.string().optional(),
-    });
-
-    const parsed = bodySchema.safeParse(req.body);
+    const parsed = UpdateMealBodySchema.safeParse(req.body);
     if (!parsed.success) {
         return res.status(400).json({ error: 'Некорректные данные' });
     }
