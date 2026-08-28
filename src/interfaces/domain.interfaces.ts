@@ -1,4 +1,5 @@
-// Meals Interfaces
+// Meals Interfaces for domain part
+
 interface CreateMealParams {
     userId: number;
     productId: number;
@@ -30,7 +31,8 @@ interface MealWithDetails {
 
 export { MealItem, MealWithDetails, CreateMealParams, UpdateMealParams };
 
-// User Interfaces
+// User Interfaces for domain part
+
 interface User {
     id: number;
     name: string;
@@ -40,6 +42,15 @@ interface User {
     age: number;
     gender: 'M' | 'F';
     activityLevel: number;
+    tdee: number;
 }
 
-export { User };
+interface UpdateUserParams {
+    name?: string;
+    weight?: number;
+    height?: number;
+    age?: number;
+    activityLevel?: number;
+}
+
+export { User, UpdateUserParams};

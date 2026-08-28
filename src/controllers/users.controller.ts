@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import { getUserQuerySchema } from "../validation/user.schema";
-import { getUserById } from "../services/users.service";
+import {getUserQuerySchema, UpdateBodySchema} from "../validation/user.schema";
+import {getUserById, updateUserData} from "../services/users.service";
 
 async function getUser(req: Request, res: Response, next: NextFunction)  {
     const parsedQuerySchema = getUserQuerySchema.safeParse(req.params);
@@ -20,4 +20,24 @@ async function getUser(req: Request, res: Response, next: NextFunction)  {
     }
 }
 
-export default { getUser };
+async function updateUser(req: Request, res: Response, next: NextFunction) {
+    const parsedQuerySchema = UpdateBodySchema.safeParse(req.body);
+
+    if (!parsedQuerySchema.success) {
+        return res.status(400).json({
+            error: "Один из параметров неправильный"
+        })
+    }
+
+    try {
+        const userUpdate= await updateUserData(parsedQuerySchema.data.id, parsedQuerySchema.data)
+
+
+        return res.json(userUpdate);
+    } catch (err) {
+        next(err);
+    }
+
+}
+
+export default { getUser, updateUser };

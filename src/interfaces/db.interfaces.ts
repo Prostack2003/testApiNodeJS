@@ -1,3 +1,5 @@
+// Meal Interfaces after query from DB
+
 interface MealRow {
     id: number;
     user_id: number;
@@ -15,3 +17,21 @@ interface MealWithDetailsRow {
 }
 
 export { MealRow, MealWithDetailsRow };
+
+// User interfaces after query from DB
+
+
+type Gender = 'M' | 'F'
+
+interface UserRow {
+    id: number;
+    name: string;
+    email: string;
+    weight: string;
+    height: string;
+    age: string;
+    gender: Gender;
+    activityLevel: string;
+}
+
+export { UserRow };
