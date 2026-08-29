@@ -17,4 +17,9 @@ const UpdateMealBodySchema = z.object({
     date_eat: z.string().optional(),
 });
 
-export { GetMealsQuerySchema, CreateMealBodySchema, UpdateMealBodySchema }
+const MealParamsBodySchema = z.object({
+    id: z.string().transform(Number),
+})
+
+
+export { GetMealsQuerySchema, CreateMealBodySchema, UpdateMealBodySchema, MealParamsBodySchema }

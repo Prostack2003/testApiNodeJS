@@ -1,19 +1,9 @@
 import { Request, Response, NextFunction } from "express";
-import {DeleteUserSchema, getUserQuerySchema, UpdateBodySchema} from "../validation/user.schema";
 import {deleteUserData, getUserById, updateUserData} from "../services/users.service";
 
 async function getUser(req: Request, res: Response, next: NextFunction)  {
-    const parsedQuerySchema = getUserQuerySchema.safeParse(req.params);
-
-    if (!parsedQuerySchema.success) {
-        return res.status(400).json({
-            error: "id должен быть числом!",
-        })
-    }
-
     try {
-        const user = await getUserById(parsedQuerySchema.data.id);
-
+        const user = await getUserById(Number(req.params.id));
         return res.json(user);
     } catch (err) {
         next(err);
@@ -21,37 +11,18 @@ async function getUser(req: Request, res: Response, next: NextFunction)  {
 }
 
 async function updateUser(req: Request, res: Response, next: NextFunction) {
-    const parsedQuerySchema = UpdateBodySchema.safeParse(req.body);
-
-    if (!parsedQuerySchema.success) {
-        return res.status(400).json({
-            error: "Один из параметров неправильный"
-        })
-    }
-
     try {
-        const userUpdate= await updateUserData(parsedQuerySchema.data.id, parsedQuerySchema.data)
-
-
+        const userUpdate= await updateUserData(Number(req.params.id), req.body)
         return res.json(userUpdate);
     } catch (err) {
         next(err);
     }
-
 }
 
 async function deleteUser(req: Request, res: Response, next: NextFunction) {
-    const parsedQuerySchema = DeleteUserSchema.safeParse(req.params)
-
-    if (!parsedQuerySchema.success) {
-        return res.status(400).json({
-            error: "Невалидный id пользователя!"
-        })
-    }
-
     try {
-        return res.json(await deleteUserData(parsedQuerySchema.data.id));
-
+        const deleteUser = await deleteUserData(Number(req.params.id));
+        return res.json(deleteUser);
     } catch (err) {
         next(err);
     }
