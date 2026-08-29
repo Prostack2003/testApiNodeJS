@@ -13,4 +13,8 @@ const UpdateBodySchema = z.object({
     activityLevel: z.number().min(1).max(5).optional(),
 })
 
-export { getUserQuerySchema, UpdateBodySchema }
+const DeleteUserSchema = z.object({
+    id: z.coerce.number(),
+})
+
+export { getUserQuerySchema, UpdateBodySchema, DeleteUserSchema }

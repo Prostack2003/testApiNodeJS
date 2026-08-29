@@ -53,4 +53,6 @@ interface UpdateUserParams {
     activityLevel?: number;
 }
 
-export { User, UpdateUserParams};
+type DeleteUserInfo = Pick<User, 'id' | 'name'>;
+
+export { User, UpdateUserParams, DeleteUserInfo };

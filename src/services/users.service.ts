@@ -1,5 +1,5 @@
 import pool from "../db/pool.ts";
-import { UpdateUserParams, User} from "../interfaces/domain.interfaces";
+import {DeleteUserInfo, UpdateUserParams, User} from "../interfaces/domain.interfaces";
 import {ACTIVITY_MULTIPLIERS} from "../constants/activity.ts";
 import { UserRow } from "../interfaces/db.interfaces.ts";
 
@@ -127,4 +127,21 @@ async function updateUserData(id: number, updates: UpdateUserParams): Promise<Us
 
 }
 
-export { getUserById, calculateTDEE, updateUserData };
+async function deleteUserData(userId: number): Promise<DeleteUserInfo> {
+    const deleteQuery = `
+        DELETE 
+        FROM users
+        WHERE id = $1
+        RETURNING id, name
+    `
+
+    const deleteResult = await pool.query <DeleteUserInfo>(deleteQuery, [userId]);
+
+    if (deleteResult.rows.length === 0) {
+        throw new Error('USER_NOT_FOUND');
+    }
+
+    return deleteResult.rows[0];
+}
+
+export { getUserById, calculateTDEE, updateUserData, deleteUserData };

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import {getUserQuerySchema, UpdateBodySchema} from "../validation/user.schema";
-import {getUserById, updateUserData} from "../services/users.service";
+import {DeleteUserSchema, getUserQuerySchema, UpdateBodySchema} from "../validation/user.schema";
+import {deleteUserData, getUserById, updateUserData} from "../services/users.service";
 
 async function getUser(req: Request, res: Response, next: NextFunction)  {
     const parsedQuerySchema = getUserQuerySchema.safeParse(req.params);
@@ -40,4 +40,21 @@ async function updateUser(req: Request, res: Response, next: NextFunction) {
 
 }
 
-export default { getUser, updateUser };
+async function deleteUser(req: Request, res: Response, next: NextFunction) {
+    const parsedQuerySchema = DeleteUserSchema.safeParse(req.params)
+
+    if (!parsedQuerySchema.success) {
+        return res.status(400).json({
+            error: "Невалидный id пользователя!"
+        })
+    }
+
+    try {
+        return res.json(await deleteUserData(parsedQuerySchema.data.id));
+
+    } catch (err) {
+        next(err);
+    }
+}
+
+export default { getUser, updateUser, deleteUser };
