@@ -45,6 +45,17 @@ interface User {
     tdee: number;
 }
 
+interface CreateUserParams {
+    name: string;
+    email: string;
+    password: string;
+    weight: number;
+    height: number;
+    age: number;
+    gender: 'M' | 'F';
+    activityLevel: number;
+}
+
 interface UpdateUserParams {
     name?: string;
     weight?: number;
@@ -55,4 +66,4 @@ interface UpdateUserParams {
 
 type DeleteUserInfo = Pick<User, 'id' | 'name'>;
 
-export { User, UpdateUserParams, DeleteUserInfo };
+export { User, UpdateUserParams, CreateUserParams, DeleteUserInfo };

@@ -1,7 +1,7 @@
 import express from "express";
 import usersController from "../controllers/users.controller";
 import validate from "../middleware/validate";
-import {DeleteUserSchema, getUserQuerySchema, UpdateBodySchema} from "../validation/user.schema";
+import {DeleteUserSchema, getUserQuerySchema, CreateUserBodySchema ,UpdateBodySchema} from "../validation/user.schema";
 
 
 const usersRouter = express.Router();
@@ -11,6 +11,12 @@ usersRouter.get(
     validate(getUserQuerySchema, 'params'),
     usersController.getUser
 );
+
+usersRouter.post(
+    '/',
+    validate(CreateUserBodySchema, 'body'),
+    usersController.createUser
+)
 
 usersRouter.patch(
     "/:id",
