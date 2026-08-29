@@ -102,7 +102,7 @@ async function updateUserData(id: number, updates: UpdateUserParams): Promise<Us
     }
 
     const row = result.rows[0];
-    const rowWithouTDEE = {
+    const rowWithoutTDEE = {
         id: row.id,
         name: row.name,
         email: row.email,
@@ -122,7 +122,7 @@ async function updateUserData(id: number, updates: UpdateUserParams): Promise<Us
         age: Number(row.age),
         gender: row.gender,
         activityLevel: Number(row.activityLevel),
-        tdee: await calculateTDEE(rowWithouTDEE)
+        tdee: await calculateTDEE(rowWithoutTDEE)
     };
 
 }
