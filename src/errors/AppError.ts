@@ -4,8 +4,9 @@ class AppError extends Error {
 
     constructor(message: string, statusCode: number, userMessage: string) {
         super(message);
+        this.message = message;
         this.statusCode = statusCode;
-        this.userMessage = message;
+        this.userMessage = userMessage;
     }
 }
 
