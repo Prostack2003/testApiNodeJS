@@ -1,6 +1,7 @@
 import pool from "../db/pool";
 import {CreateMealParams, MealItem, MealWithDetails, UpdateMealParams} from "../interfaces/domain.interfaces";
 import {MealRow, MealWithDetailsRow} from "../interfaces/db.interfaces";
+import { AppError } from "../errors/AppError.ts";
 
 async function getMeals(userId: number, date?: string): Promise<MealWithDetails[]> {
     let productUserDataQuery =
@@ -39,19 +40,19 @@ async function getMeals(userId: number, date?: string): Promise<MealWithDetails[
 async function createMeal(params : CreateMealParams ): Promise<MealItem> {
 
     if (!params.weightGrams || params.weightGrams <= 0) {
-        throw new Error('VALIDATION_ERROR');
+        throw new AppError('VALIDATION_ERROR', 400, 'Данные не валидны');
     }
 
     const searchUserQuery = `SELECT name FROM users WHERE id = $1`
     const searchUserResult = await pool.query<{ name: string }>(searchUserQuery, [params.userId]);
     if (searchUserResult.rows.length === 0) {
-        throw new Error('USER_NOT_FOUND');
+        throw new AppError('USER_NOT_FOUND', 404, 'Пользователь не найден');
     }
 
     const searchProductQuery = `SELECT name FROM products WHERE id = $1`
     const searchProductResult = await pool.query<{ name: string }>(searchProductQuery, [params.productId]);
     if (searchProductResult.rows.length === 0) {
-        throw new Error('PRODUCT_NOT_FOUND');
+        throw new AppError('PRODUCT_NOT_FOUND', 404, 'Продукт не найден');
     }
 
 
@@ -82,21 +83,23 @@ async function updateMeal(id: number, updates: UpdateMealParams): Promise<MealIt
     const fieldsQuery: string[] = [];
     const paramsQuery: Array<string | number> = [];
 
-    if (updates.weightGrams != null) {
-        fieldsQuery.push(`weight_grams = $${paramsQuery.length + 1}`)
-        paramsQuery.push(updates.weightGrams)
-    }
-    if (updates.dateEat != null) {
-        fieldsQuery.push(`date_eat = $${paramsQuery.length + 1}`)
-        paramsQuery.push(updates.dateEat)
-    }
-
     if (updates.weightGrams != null && updates.weightGrams <= 0) {
-        throw new Error('VALIDATION_ERROR');
+        throw new AppError('VALIDATION_ERROR', 400, 'Данные не валидны');
     }
 
     if (fieldsQuery.length === 0) {
-        throw new Error('NOTHING_TO_UPDATE')
+        throw new AppError('NOTHING_TO_UPDATE', 400, 'Обновлять нечего')
+    }
+
+    if (updates.weightGrams != null) {
+        fieldsQuery.push(`weight_grams = $${paramsQuery.length + 1}`)
+        paramsQuery.push(updates.weightGrams)
+
+    }
+
+    if (updates.dateEat != null) {
+        fieldsQuery.push(`date_eat = $${paramsQuery.length + 1}`)
+        paramsQuery.push(updates.dateEat)
     }
 
     paramsQuery.push(id);
@@ -111,7 +114,7 @@ async function updateMeal(id: number, updates: UpdateMealParams): Promise<MealIt
 
     const result = await pool.query<MealRow>(queryUpdate, paramsQuery);
     if (result.rows.length === 0) {
-        throw new Error('MEAL_NOT_FOUND');
+        throw new AppError('MEAL_NOT_FOUND', 404, 'Еда не найдена');
     }
 
     const row = result.rows[0];
@@ -131,7 +134,12 @@ async function deleteMeal(id: number): Promise<boolean> {
              WHERE id = $1 RETURNING id`;
 
         const deleteResult = await pool.query<{id: number}>(deleteQuery, [id]);
-        return deleteResult.rows.length !== 0;
+
+        if (deleteResult.rows.length === 0) {
+            throw new AppError('MEAL_NOT_FOUND', 404, 'Еда не найдена');
+        }
+
+        return true;
 }
 
 export default {getMeals, createMeal, updateMeal, deleteMeal};

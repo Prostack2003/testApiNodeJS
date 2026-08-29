@@ -2,6 +2,7 @@ import pool from "../db/pool.ts";
 import {DeleteUserInfo, UpdateUserParams, User} from "../interfaces/domain.interfaces";
 import {ACTIVITY_MULTIPLIERS} from "../constants/activity.ts";
 import { UserRow } from "../interfaces/db.interfaces.ts";
+import { AppError } from "../errors/AppError.ts";
 
 async function getUserById (userId: number) {
     const getUserQuery = `
@@ -20,7 +21,7 @@ async function getUserById (userId: number) {
     const getResult = await pool.query<User>(getUserQuery, [userId]);
 
     if (getResult.rows.length === 0) {
-        throw new Error('USER_NOT_FOUND');
+        throw new AppError('USER_NOT_FOUND', 404, 'Пользователь не найден');
     }
 
     const dbUser = getResult.rows[0];
@@ -75,7 +76,7 @@ async function updateUserData(id: number, updates: UpdateUserParams): Promise<Us
     }
 
     if (fieldsQuery.length === 0) {
-        throw new Error('NOTHING_TO_UPDATE')
+        throw new AppError('NOTHING_TO_UPDATE', 400, 'Нечего обновлять')
     }
 
     paramsQuery.push(id);
@@ -98,7 +99,7 @@ async function updateUserData(id: number, updates: UpdateUserParams): Promise<Us
 
     const result = await pool.query<UserRow>(queryUpdate, paramsQuery);
     if (result.rows.length === 0) {
-        throw new Error('USER_NOT_FOUND');
+        throw new AppError('USER_NOT_FOUND', 404, 'Пользователь не найден');
     }
 
     const row = result.rows[0];
@@ -138,7 +139,7 @@ async function deleteUserData(userId: number): Promise<DeleteUserInfo> {
     const deleteResult = await pool.query <DeleteUserInfo>(deleteQuery, [userId]);
 
     if (deleteResult.rows.length === 0) {
-        throw new Error('USER_NOT_FOUND');
+        throw new AppError('USER_NOT_FOUND', 404, 'Пользователь не найден');
     }
 
     return deleteResult.rows[0];
