@@ -5,6 +5,7 @@ import mealsRouter from './routes/meals.router';
 import errorHandler from './middleware/errorHandler';
 import cors from 'cors';
 import usersRouter from "./routes/users.router";
+import authRouter from "./routes/auth.router.ts";
 
 // CORS for connect with Frontend
 const app = express();
@@ -23,6 +24,9 @@ app.get('/', (req: Request, res: Response) => {
 
 // URL with /api/meals
 app.use('/api/meals', mealsRouter);
+
+// URL with /api/auth
+app.use('/api/auth', authRouter);
 
 // URL with /api/users
 app.use('/api/users', usersRouter);
