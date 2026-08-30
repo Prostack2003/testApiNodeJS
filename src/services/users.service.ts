@@ -1,8 +1,9 @@
-import pool from "../db/pool.ts";
+import pool from "../db/pool";
 import {CreateUserParams, DeleteUserInfo, UpdateUserParams, User} from "../interfaces/domain.interfaces";
-import {ACTIVITY_MULTIPLIERS} from "../constants/activity.ts";
-import { UserRow } from "../interfaces/db.interfaces.ts";
-import { AppError } from "../errors/AppError.ts";
+import {ACTIVITY_MULTIPLIERS} from "../constants/activity";
+import { UserRow } from "../interfaces/db.interfaces";
+import { AppError } from "../errors/AppError";
+import bcrypt from "bcrypt";
 
 async function calculateTDEE (user: Omit<User, 'tdee'>): Promise<number> {
     let BMR = 0;
@@ -48,6 +49,8 @@ async function getUserById (userId: number) {
 }
 
 async function createNewUser(params: CreateUserParams): Promise<User> {
+    const saltRound = 10
+    const hashPassword = await bcrypt.hash(params.password, saltRound);
     const insertQuery = `
         INSERT INTO users (name, password, email, weight, height, age, gender, activity_level)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
@@ -64,7 +67,7 @@ async function createNewUser(params: CreateUserParams): Promise<User> {
 
     const result = await pool.query<UserRow>(insertQuery, [
         params.name,
-        params.password,
+        hashPassword,
         params.email,
         params.weight,
         params.height,
