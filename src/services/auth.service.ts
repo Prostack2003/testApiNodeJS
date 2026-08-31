@@ -1,6 +1,9 @@
 import pool from "../db/pool";
 import {AppError} from "../errors/AppError.ts";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import { StringValue } from 'ms';
+import config from "../config";
 
 async function authUser (email: string, password: string) {
     const authSearchQuery =
@@ -26,7 +29,13 @@ async function authUser (email: string, password: string) {
         throw new AppError('INVALID_CREDENTIALS', 401,'Неверный email или пароль' );
     }
 
-    return {id: user.id, email: user.email};
+    return jwt.sign({
+            id: user.id,
+            email: user.email,
+        },
+        config.jwt.secret,
+        {expiresIn: config.jwt.expiresIn as StringValue},
+    )
 }
 
 export { authUser }

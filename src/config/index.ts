@@ -10,6 +10,8 @@ const envSchema = z.object({
     DB_HOST: z.string(),
     DB_PORT: z.string().default('5432').transform(Number),
     DB_DATABASE: z.string(),
+    JWT_SECRET: z.string(),
+    JWT_EXPIRES_IN: z.string().regex(/^\d+\s?(s|m|h|d|w|y)$/)
 });
 
 const parsedEnv = envSchema.safeParse(process.env);
@@ -29,6 +31,10 @@ const config: ConfigInterface = {
         port: parsedEnv.data.DB_PORT,
         database: parsedEnv.data.DB_DATABASE,
     },
+    jwt: {
+        secret: parsedEnv.data.JWT_SECRET,
+        expiresIn: parsedEnv.data.JWT_EXPIRES_IN,
+    }
 };
 
 export default config;

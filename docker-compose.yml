@@ -3,13 +3,8 @@ services:
     build: .
     ports:
       - "${PORT:-3000}:3000"
-    environment:
-      - PORT=${PORT:-3000}
-      - DB_USER=${DB_USER}
-      - DB_DATABASE=${DB_DATABASE}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_HOST=${DB_HOST:-db}
-      - DB_PORT=${DB_PORT:-5432}
+    env_file:
+      .env
     depends_on:
       db:
         condition: service_healthy
