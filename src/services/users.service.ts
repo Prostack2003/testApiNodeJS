@@ -20,7 +20,11 @@ async function calculateTDEE (user: Omit<User, 'tdee'>): Promise<number> {
     return Math.round(result * 10) / 10;
 }
 
-async function getUserById (userId: number) {
+async function getUserById (userId: number, tokenId: number) {
+    if (userId !== tokenId) {
+        throw new AppError('FORBIDDEN', 403, 'Доступ запрещен')
+    }
+
     const getUserQuery = `
         SELECT 
             id, 
@@ -95,9 +99,13 @@ async function createNewUser(params: CreateUserParams): Promise<User> {
     };
 }
 
-async function updateUserData(id: number, updates: UpdateUserParams): Promise<User> {
+async function updateUserData(id: number, tokenId: number, updates: UpdateUserParams): Promise<User> {
     const fieldsQuery: string[] = [];
     const paramsQuery: Array<string | number> = [];
+
+    if (id !== tokenId) {
+        throw new AppError('FORBIDDEN', 403, 'Доступ запрещен')
+    }
 
     if (updates.name != null) {
         fieldsQuery.push(`name = $${paramsQuery.length + 1}`);
@@ -176,7 +184,12 @@ async function updateUserData(id: number, updates: UpdateUserParams): Promise<Us
 
 }
 
-async function deleteUserData(userId: number): Promise<DeleteUserInfo> {
+async function deleteUserData(userId: number, tokenId: number): Promise<DeleteUserInfo> {
+
+    if (userId !== tokenId) {
+        throw new AppError('FORBIDDEN', 403, 'Доступ запрещен')
+    }
+
     const deleteQuery = `
         DELETE 
         FROM users

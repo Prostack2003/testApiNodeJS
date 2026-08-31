@@ -16,7 +16,7 @@ const CreateUserBodySchema = z.object({
 });
 
 const UpdateBodySchema = z.object({
-    id: z.coerce.number(),
+    id: z.coerce.number().optional(),
     name: z.string().min(1).optional(),
     age: z.number().positive().optional(),
     weight: z.number().positive().optional(),

@@ -1,7 +1,7 @@
-import { Request, Response, NextFunction } from "express";
+import {NextFunction, Request, Response} from "express";
 import config from "../config/index";
 import jwt from "jsonwebtoken";
-import { AppError } from "../errors/AppError";
+import {AppError} from "../errors/AppError";
 
 function authenticate(req: Request, res: Response, next: NextFunction) {
     // 1. Читаем заголовок
@@ -30,10 +30,12 @@ function authenticate(req: Request, res: Response, next: NextFunction) {
         }
 
         // 7. Кладём данные пользователя в req.user
-        req.user = {
+        const authUser: { id: number; email: string } = {
             id: decoded.id,
             email: decoded.email,
         };
+
+        req.user = authUser;
 
         // 8. Пропускаем запрос дальше к контроллеру
         next();
