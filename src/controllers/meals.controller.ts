@@ -4,7 +4,7 @@ import {CreateMealParams} from "../interfaces/domain.interfaces";
 
 async function getMeals(req: Request, res: Response, next: NextFunction) {
    try {
-       const meals = await mealsService.getMeals(Number(req.query.user_id), req.query.date ? String(req.query.date) : undefined);
+       const meals = await mealsService.getMeals(Number(req.user?.id), req.query.date ? String(req.query.date) : undefined);
 
        return res.json(meals);
    } catch (err) {
@@ -14,7 +14,7 @@ async function getMeals(req: Request, res: Response, next: NextFunction) {
 async function createMeal(req: Request, res: Response, next: NextFunction) {
         try {
             const params: CreateMealParams = {
-                userId: req.body.user_id,
+                userId: Number(req.user?.id),
                 productId: req.body.product_id,
                 weightGrams: req.body.weight_grams,
                 dateEat: req.body.date_eat,
@@ -29,7 +29,11 @@ async function createMeal(req: Request, res: Response, next: NextFunction) {
 async function updateMeal(req: Request, res: Response, next: NextFunction) {
 
     try {
-        const updated = await mealsService.updateMeal(Number(req.params.id), {
+        let userTokenId = undefined;
+        if (req.user) {
+            userTokenId = req.user.id
+        }
+        const updated = await mealsService.updateMeal(Number(req.params.id), Number(userTokenId), {
             weightGrams: req.body.weight_grams,
             dateEat: req.body.date_eat,
         });
@@ -40,7 +44,11 @@ async function updateMeal(req: Request, res: Response, next: NextFunction) {
 }
 async function deleteMeal(req: Request, res: Response, next: NextFunction) {
     try {
-        await mealsService.deleteMeal(Number(req.params.id));
+        let userTokenId = undefined;
+        if (req.user) {
+            userTokenId = req.user.id
+        }
+        await mealsService.deleteMeal(Number(req.params.id), Number(userTokenId));
         return res.status(204).end();
     } catch (err) {
         next(err);

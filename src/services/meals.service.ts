@@ -79,16 +79,12 @@ async function createMeal(params : CreateMealParams ): Promise<MealItem> {
     };
 
 }
-async function updateMeal(id: number, updates: UpdateMealParams): Promise<MealItem> {
+async function updateMeal(id: number, userTokenId: number, updates: UpdateMealParams): Promise<MealItem> {
     const fieldsQuery: string[] = [];
     const paramsQuery: Array<string | number> = [];
 
     if (updates.weightGrams != null && updates.weightGrams <= 0) {
         throw new AppError('VALIDATION_ERROR', 400, 'Данные не валидны');
-    }
-
-    if (fieldsQuery.length === 0) {
-        throw new AppError('NOTHING_TO_UPDATE', 400, 'Обновлять нечего')
     }
 
     if (updates.weightGrams != null) {
@@ -102,13 +98,19 @@ async function updateMeal(id: number, updates: UpdateMealParams): Promise<MealIt
         paramsQuery.push(updates.dateEat)
     }
 
+    if (fieldsQuery.length === 0) {
+        throw new AppError('NOTHING_TO_UPDATE', 400, 'Обновлять нечего')
+    }
+
     paramsQuery.push(id);
     const idPlaceholder = `$${paramsQuery.length}`;
+    paramsQuery.push(userTokenId)
+    const userTokenIdPlaceholder = `$${paramsQuery.length}`;
 
     const queryUpdate = `
         UPDATE meal_items 
         SET ${fieldsQuery.join(', ')} 
-        WHERE id = ${idPlaceholder} 
+        WHERE id = ${idPlaceholder} AND user_id = ${userTokenIdPlaceholder}
         RETURNING id, user_id, product_id, weight_grams, date_eat::text AS date_eat
     `;
 
@@ -127,19 +129,21 @@ async function updateMeal(id: number, updates: UpdateMealParams): Promise<MealIt
     };
 
 }
-async function deleteMeal(id: number): Promise<boolean> {
-        const deleteQuery =
-            `DELETE
-             FROM meal_items
-             WHERE id = $1 RETURNING id`;
+async function deleteMeal(id: number, userTokenId: number): Promise<boolean> {
 
-        const deleteResult = await pool.query<{id: number}>(deleteQuery, [id]);
+    const deleteQuery =
+        `DELETE
+         FROM meal_items
+         WHERE id = $1 AND user_id = $2 
+         RETURNING id`;
 
-        if (deleteResult.rows.length === 0) {
-            throw new AppError('MEAL_NOT_FOUND', 404, 'Еда не найдена');
-        }
+    const deleteResult = await pool.query<{id: number}>(deleteQuery, [id, userTokenId]);
 
-        return true;
+    if (deleteResult.rows.length === 0) {
+        throw new AppError('MEAL_NOT_FOUND', 404, 'Еда не найдена');
+    }
+
+    return true;
 }
 
 export default {getMeals, createMeal, updateMeal, deleteMeal};
