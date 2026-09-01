@@ -11,4 +11,14 @@ authRouter.post(
     authController.loginUser,
 );
 
+authRouter.post(
+    '/refresh',
+    authController.refreshUser,
+)
+
+authRouter.post(
+    '/logout',
+    authController.logoutUser
+)
+
 export default authRouter;

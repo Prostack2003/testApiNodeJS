@@ -1,3 +1,4 @@
+import cookieParser from 'cookie-parser';
 import express from 'express';
 import { Request, Response } from 'express';
 import config from './config/index';
@@ -16,6 +17,9 @@ app.use(cors({
 // Parse JSON with HTTP Requests
 
 app.use(express.json());
+
+// Cookie Parser
+app.use(cookieParser());
 
 // Start URL - http:localhost:3000
 app.get('/', (req: Request, res: Response) => {
