@@ -1,8 +1,8 @@
 import pool from "../db/pool";
 import {CreateUserParams, DeleteUserInfo, UpdateUserParams, User} from "../interfaces/domain.interfaces";
 import {ACTIVITY_MULTIPLIERS} from "../constants/activity";
-import { UserRow } from "../interfaces/db.interfaces";
-import { AppError } from "../errors/AppError";
+import {UserRow} from "../interfaces/db.interfaces";
+import {AppError} from "../errors/AppError";
 import bcrypt from "bcrypt";
 
 async function calculateTDEE (user: Omit<User, 'tdee'>): Promise<number> {
@@ -206,4 +206,78 @@ async function deleteUserData(userId: number, tokenId: number): Promise<DeleteUs
     return deleteResult.rows[0];
 }
 
-export { getUserById, createNewUser, calculateTDEE, updateUserData, deleteUserData };
+async function getUserProfile(userId: number) {
+    const result = await pool.query(`
+        SELECT name, email, age, weight, height, gender, activity_level
+        FROM users
+        WHERE id = $1
+    `, [userId]);
+
+    if (!result.rows[0]) {
+        throw new AppError('USER_NOT_FOUND', 404, 'Пользователь не найден');
+    }
+
+    const row = result.rows[0];
+    return {
+        ...row,
+        weight: Number(row.weight),
+        height: Number(row.height),
+        age: Number(row.age),
+        activity_level: Number(row.activity_level),
+    };
+}
+
+async function changeUserPassword(userId: number, oldPassword: string, newPassword: string): Promise<void> {
+    // 1. SELECT password FROM users WHERE id = $1
+    const query =
+        `
+        SELECT password
+        FROM users
+        WHERE id = $1
+        `
+
+    const result = await pool.query(query, [userId]);
+    // 2. Проверить, что пользователь существует
+
+    if (!result.rows[0]) {
+        throw new AppError('USER_NOT_FOUND', 404, 'Пользователь не найден');
+    }
+
+    // 3. bcrypt.compare(oldPassword, currentHash)
+    const currentHash = result.rows[0].password;
+    const isPass = await bcrypt.compare(oldPassword, currentHash)
+    // 4. Если не совпадает — throw AppError
+
+    if (!isPass) {
+        throw new AppError('INVALID_PASSWORD', 401, 'Неверный текущий пароль');
+    }
+    // 5. bcrypt.hash(newPassword, 10)
+    const saltRound = 10
+    const hashPassword = await bcrypt.hash(newPassword, saltRound);
+    // 6. UPDATE users SET password = $1 WHERE id = $2
+    const queryUpdate =
+        `
+        UPDATE users 
+        SET password = $1 
+        WHERE id = $2
+        `
+    await pool.query(queryUpdate, [hashPassword, userId]);
+    // 7. DELETE FROM refresh_tokens WHERE user_id = $1
+    const queryDelete =
+        `
+        DELETE 
+        FROM refresh_tokens 
+        WHERE user_id = $1
+        `
+    await pool.query(queryDelete, [userId]);
+}
+
+export {
+    calculateTDEE,
+    getUserById,
+    createNewUser,
+    updateUserData,
+    deleteUserData,
+    getUserProfile,
+    changeUserPassword,
+};

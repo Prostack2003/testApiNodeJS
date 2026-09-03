@@ -28,4 +28,25 @@ const DeleteUserSchema = z.object({
     id: z.coerce.number(),
 })
 
-export { getUserQuerySchema, CreateUserBodySchema, UpdateBodySchema, DeleteUserSchema }
+const UpdateProfileBodySchema = z.object({
+    name: z.string().min(1).optional(),
+    age: z.number().positive().optional(),
+    weight: z.number().positive().optional(),
+    height: z.number().positive().optional(),
+    activityLevel: z.number().min(1).max(5).optional(),
+    gender: z.enum(['M', 'F']).optional(),
+});
+
+const ChangePasswordBodySchema = z.object({
+    oldPassword: z.string().min(1),
+    newPassword: z.string().min(8),
+});
+
+export {
+    getUserQuerySchema,
+    CreateUserBodySchema,
+    UpdateBodySchema,
+    DeleteUserSchema,
+    UpdateProfileBodySchema,
+    ChangePasswordBodySchema,
+}

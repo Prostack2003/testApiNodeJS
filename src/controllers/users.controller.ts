@@ -1,6 +1,12 @@
 import { Request, Response, NextFunction } from "express";
-import {createNewUser, deleteUserData, getUserById, updateUserData} from "../services/users.service";
-import {User} from "../interfaces/domain.interfaces.ts";
+import {
+    changeUserPassword,
+    createNewUser,
+    deleteUserData,
+    getUserById,
+    getUserProfile,
+    updateUserData,
+} from "../services/users.service";
 
 async function getUser(req: Request, res: Response, next: NextFunction)  {
     try {
@@ -50,4 +56,48 @@ async function deleteUser(req: Request, res: Response, next: NextFunction) {
     }
 }
 
-export default { getUser, createUser, updateUser, deleteUser };
+async function getProfile(req: Request, res: Response, next: NextFunction) {
+    try {
+        const user = await getUserProfile(Number(req.user?.id));
+        return res.json({ user });
+    } catch (err) {
+        next(err);
+    }
+}
+
+async function updateProfile(req: Request, res: Response, next: NextFunction) {
+    try {
+        const userId = req.user?.id
+        const tokenId = req.user?.id
+        const updates = req.body;
+
+        const updateUser = await updateUserData(Number(userId), Number(tokenId), updates);
+        return res.json({ user: updateUser });
+    } catch (err) {
+        next(err);
+    }
+}
+
+async function changePassword(req: Request, res: Response, next: NextFunction) {
+    try {
+        const userId = req.user?.id
+        const body = req.body;
+
+        await changeUserPassword(Number(userId), body.oldPassword, body.newPassword);
+        return res.status(200).json({
+            message: 'Пароль успешно изменён'
+        });
+    } catch (err) {
+        next(err);
+    }
+}
+
+export default {
+    getUser,
+    createUser,
+    updateUser,
+    deleteUser,
+    getProfile,
+    updateProfile,
+    changePassword,
+};
