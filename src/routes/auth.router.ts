@@ -1,6 +1,6 @@
 import express from "express";
 import authController from "../controllers/auth.controller";
-import {LoginBodySchema} from "../validation/auth.schema";
+import {ForgotPasswordBodySchema, LoginBodySchema, ResetPasswordBodySchema} from "../validation/auth.schema";
 import validate from "../middleware/validate";
 
 const authRouter = express.Router();
@@ -23,11 +23,13 @@ authRouter.post(
 
 authRouter.post(
     '/forgot-password',
+    validate(ForgotPasswordBodySchema, 'body'),
     authController.forgotPassword
 )
 
 authRouter.post(
     '/reset-password',
+    validate(ResetPasswordBodySchema, 'body'),
     authController.resetPassword
 );
 

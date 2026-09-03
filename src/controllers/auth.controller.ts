@@ -87,9 +87,14 @@ async function forgotPassword (req: Request, res: Response, next: NextFunction) 
         const result = await pool.query(querySearchUser, [email]);
         const user = result.rows[0] || null;
         if (user) {
-            await passwordResetService.deleteUserTokens(user.id)
-            const token = await passwordResetService.createResetToken(user.id)
-            await emailService.sendPasswordResetEmail(email, token);
+            try {
+                await passwordResetService.deleteUserTokens(user.id);
+                const token = await passwordResetService.createResetToken(user.id);
+                await emailService.sendPasswordResetEmail(email, token);
+            } catch (emailError) {
+                console.error('Ошибка отправки письма:', emailError);
+                // НЕ пробрасываем ошибку — клиент получает 200
+            }
         }
 
         if (!email) {
