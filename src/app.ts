@@ -6,7 +6,8 @@ import mealsRouter from './routes/meals.router';
 import errorHandler from './middleware/errorHandler';
 import cors from 'cors';
 import usersRouter from "./routes/users.router";
-import authRouter from "./routes/auth.router.ts";
+import authRouter from "./routes/auth.router";
+import clientRedis, {redisReady} from "./db/redis";
 
 // CORS for connect with Frontend
 const app = express();
@@ -40,8 +41,19 @@ app.use((req: Request, res: Response) => {
     res.status(404).json({ error: 'Not Found' });
 });
 app.use(errorHandler)
-app.listen(config.port, () => {
-    console.log(`New API with Express.JS listening on port ${config.port}`);
+
+// Redis + server start
+async function start() {
+    await redisReady;
+
+    app.listen(config.port, () => {
+        console.log(`New API with Express.JS listening on port ${config.port}`);
+    });
+}
+
+start().catch((err) => {
+    console.log('Не удалось запустить сервер:',err);
+    process.exit(1);
 });
 
 export default app;

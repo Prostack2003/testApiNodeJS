@@ -7,6 +7,10 @@ interface ConfigInterface {
         port: number,
         database: string,
     };
+    redis: {
+        host: string,
+        port: number,
+    }
     jwt: {
         secret: string,
         expiresIn: string,

@@ -39,6 +39,10 @@ const config: ConfigInterface = {
         port: parsedEnv.data.DB_PORT,
         database: parsedEnv.data.DB_DATABASE,
     },
+    redis: {
+        host: getRequiredEnv('REDIS_HOST'),
+        port: parseInt(getRequiredEnv('REDIS_PORT')),
+    },
     jwt: {
         secret: parsedEnv.data.JWT_SECRET,
         expiresIn: parsedEnv.data.JWT_EXPIRES_IN,

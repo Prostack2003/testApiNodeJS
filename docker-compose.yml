@@ -11,6 +11,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     develop:
       watch:
         - action: sync+restart
@@ -24,7 +26,18 @@ services:
           path: package.json
         - action: rebuild
           path: package-lock.json
-
+  redis:
+    image: redis:7-alpine
+    container_name: testapinodejs-redis-1
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
   db:
     image: postgres:17-alpine
     environment:
@@ -46,3 +59,4 @@ services:
 
 volumes:
   db-data:
+  redis-data:
