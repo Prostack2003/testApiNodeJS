@@ -1,6 +1,6 @@
 import {ipKeyGenerator, rateLimit} from 'express-rate-limit';
 import RedisStore from 'rate-limit-redis';
-import clientRedis from '../db/redis'; // проверь путь к твоему redis.ts
+import clientRedis from '../db/redis';
 
 // Вспомогательная функция для создания стора, чтобы не дублировать код
 const createStore = () => new RedisStore({
@@ -15,7 +15,7 @@ const createLimiter = (prefix: string, limit: number, message: string) => rateLi
     legacyHeaders: false,
     store: createStore(),
     keyGenerator: async (req) => {
-        const ipKey = await ipKeyGenerator(req.ip);
+        const ipKey = await ipKeyGenerator(String(req.ip));
         return `${prefix}:${ipKey}`;
     },
     message: { error: message },
